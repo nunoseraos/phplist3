@@ -7,7 +7,7 @@ if (!defined('PHPLISTINIT')) {
 class NFSCustomizationsPlugin extends phplistPlugin
 {
     public $name = 'NFS Customizations';
-    public $version = '0.2.1';
+    public $version = '0.2.2';
     public $authors = 'NFS';
     public $description = 'Reusable customizations for NFS phpList upgrades.';
     public $coderoot = 'plugins/NFSCustomizationsPlugin/';
@@ -63,7 +63,13 @@ class NFSCustomizationsPlugin extends phplistPlugin
         13 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
         14 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
         18 => 'https://creditoacertado.pt/welcome-simulacoes/',
-        999 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
+        // 999 = s01-dividas · 1000 = s02-posso-comprar.
+        // A entrada 1001 foi removida em 2026-08-18: essa subscribe page nunca
+        // chegou a existir na instalação (`phplist_subscribepage` só tem
+        // 2, 3, 14, 18, 999 e 1000). Um id inexistente faz o phpList cair na
+        // página por omissão, que mostra as 12 listas e todos os atributos.
+        999 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
+        1000 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
     );
 
     private $confirmationRedirectsByProfile = array(
@@ -80,16 +86,25 @@ class NFSCustomizationsPlugin extends phplistPlugin
             13 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
             14 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
             18 => 'https://creditoacertado.pt/welcome-simulacoes/',
-            999 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
+            999 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
+            1000 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
         ),
         'credito_saldo' => array(
-            14 => 'https://saldo.pt/pagina-subscricao-newsletter-simulacoes/',
+            14 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
             18 => 'https://creditoacertado.pt/welcome-simulacoes/',
+            999 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
+            1000 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
         ),
     );
 
+    // Páginas em que o email "a sua subscrição foi confirmada" do phpList é
+    // suprimido. Depois do duplo opt-in o subscritor já é reencaminhado para a
+    // página de agradecimento do site e recebe, minutos depois, o email de
+    // resposta do simulador; o aviso do phpList é um terceiro email, sem marca.
+    // As páginas do Saldo (999, 1000) faltavam aqui: eram as únicas de
+    // toda a instalação a enviá-lo.
     private $defaultSuppressPostConfirmMailPages = array(
-        1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18,
+        1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18, 999, 1000,
     );
 
     public function activate()
