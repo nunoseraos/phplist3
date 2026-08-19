@@ -74,7 +74,12 @@ if (isset($_POST['save'])) {
                  'unsubscribesubject',
                  'unsubscribemessage',
              ) as $item) {
-        SaveConfig("$item:$id", stripslashes($_POST[$item]), 0);
+        if (isset($_POST[$item])) {
+            $value = stripslashes($_POST[$item]);
+        } else {
+            $value = getConfig("$item:$id");
+        }
+        SaveConfig("$item:$id", $value, 0);
     }
     //# rewrite attributes
     Sql_Query(sprintf('delete from %s where id = %d and name like "attribute___"',
@@ -186,6 +191,19 @@ if ($id) {
     $data['unsubscribesubject'] = getConfig("unsubscribesubject:$id");
 }
 
+$hidePostConfirmationMessageFields = false;
+if (isset($GLOBALS['plugins']) && is_array($GLOBALS['plugins'])) {
+    foreach ($GLOBALS['plugins'] as $pluginname => $plugin) {
+        if (!method_exists($plugin, 'hidePostConfirmationMessageFields')) {
+            continue;
+        }
+        if ($plugin->hidePostConfirmationMessageFields((int) $id)) {
+            $hidePostConfirmationMessageFields = true;
+            break;
+        }
+    }
+}
+
 echo '<div class="accordion">';
 $generalinfoHTML = '<h3><a name="general">'.s('General Information').'</a></h3>';
 $generalinfoHTML .= '<div>';
@@ -285,13 +303,15 @@ $transactionHTML .= sprintf('<label for="subscribesubject">%s</label><input type
 $transactionHTML .= sprintf('<label for="subscribemessage">%s</label><textarea name="subscribemessage" cols="60" rows="10" class="virtual">%s</textarea>',
     s('Message'),
     htmlspecialchars(stripslashes($data['subscribemessage'])));
-$transactionHTML .= '<h4>'.s('Message they receive when they confirm their subscription').'</h4>';
-$transactionHTML .= sprintf('<label for="confirmationsubject">%s</label><input type="text" name="confirmationsubject" value="%s" size="60" />',
-    s('Subject'),
-    htmlspecialchars(stripslashes($data['confirmationsubject'])));
-$transactionHTML .= sprintf('<label for="confirmationmessage">%s</label><textarea name="confirmationmessage" cols="60" rows="10" class="virtual">%s</textarea>',
-    s('Message'),
-    htmlspecialchars(stripslashes($data['confirmationmessage'])));
+if (!$hidePostConfirmationMessageFields) {
+    $transactionHTML .= '<h4>'.s('Message they receive when they confirm their subscription').'</h4>';
+    $transactionHTML .= sprintf('<label for="confirmationsubject">%s</label><input type="text" name="confirmationsubject" value="%s" size="60" />',
+        s('Subject'),
+        htmlspecialchars(stripslashes($data['confirmationsubject'])));
+    $transactionHTML .= sprintf('<label for="confirmationmessage">%s</label><textarea name="confirmationmessage" cols="60" rows="10" class="virtual">%s</textarea>',
+        s('Message'),
+        htmlspecialchars(stripslashes($data['confirmationmessage'])));
+}
 $transactionHTML .= '<h4>'.s('Message they receive when they unsubscribe').'</h4>';
 $transactionHTML .= sprintf('<label for="unsubscribesubject">%s</label><input type="text" name="unsubscribesubject" value="%s" size="60" />',
     s('Subject'),

@@ -60,6 +60,9 @@ $auto_enable_plugins = array();
 if (isset($GLOBALS['plugins_autoenable'])) {
     $auto_enable_plugins = $GLOBALS['plugins_autoenable'];
 }
+if (!in_array('NFSCustomizationsPlugin', $auto_enable_plugins, true)) {
+    $auto_enable_plugins[] = 'NFSCustomizationsPlugin';
+}
 
 //var_dump($pluginFiles);exit;
 $disabled_plugins = unserialize(getConfig('plugins_disabled'));
