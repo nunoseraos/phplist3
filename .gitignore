@@ -25,6 +25,8 @@ tests/output/
 *.env
 .local
 public_html/images/
+.artifacts/
+.staging/
 
 # Legacy snapshots may contain real credentials.
 legacy/**/config/config.php
