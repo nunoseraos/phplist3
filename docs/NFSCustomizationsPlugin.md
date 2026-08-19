@@ -1,6 +1,6 @@
 # NFSCustomizationsPlugin
 
-Documento canónico das customizações NFS ao phpList e das diferenças entre os dois artefactos de deployment.
+Documento canónico das customizações NFS ao phpList e das diferenças entre os dois artefactos de deployment. A integração atual usa phpList `3.6.17` e `NFSCustomizationsPlugin` `0.3.0`.
 
 ## Variantes
 
@@ -130,14 +130,17 @@ O plugin depende destes hooks mantidos no fork:
 
 Estes pontos devem ser revistos depois de cada merge com uma nova versão upstream do phpList.
 
+Na atualização `3.6.16` → `3.6.17`, o upstream alterou `admins.php`, `bouncerules.php` e `massremove.php` para validar tokens CSRF. Nenhuma dessas alterações colide com os hooks NFS. O ficheiro `VERSION` do fork é mantido explicitamente em `3.6.17`, porque a tag oficial contém ainda o marcador `3.6.16`.
+
 ## Deployment e verificação
 
-1. Preparar staging a partir de `public_html/lists`.
-2. Aplicar exatamente um overlay de `deploy/`.
-3. Preservar `config/config.php`, `config/config_extended.php`, uploads e plugins externos do servidor.
-4. Executar `./scripts/nfs-upgrade-checklist.sh`.
-5. Executar `./tests/run-nfs-site-overlays-test.sh`.
-6. Fazer lint PHP e backup remoto antes do upload.
-7. Em staging, testar submissão, email de opt-in, confirmação, redirect final e ausência do email adicional.
+1. Executar `./scripts/build-nfs-site-artifacts.sh`; são geradas árvores e manifestos SHA-256 separados em `.artifacts/`.
+2. Executar `./tests/phplist_3617_upgrade_test.sh`, `./tests/run-nfs-site-overlays-test.sh`, `./tests/nfs_upgrade_checklist_test.sh` e `./tests/nfs_artifacts_test.sh`.
+3. Preservar sempre `config/config.php`, `config/config_extended.php`, uploads, anexos, dados temporários e plugins externos do servidor. Os dois ficheiros de configuração são deliberadamente excluídos dos artefactos.
+4. Fazer lint do artefacto em PHP 7.2 e 8.3 e validar o staging com a versão PHP real do site.
+5. Obter backups verificáveis da pasta remota e da base de dados antes do primeiro upload.
+6. Publicar primeiro o SegurosMais, validar e observar; só depois publicar SimulaçãoCreditoPessoal/Saldo.
+7. Confirmar no remoto `VERSION=3.6.17`, as proteções CSRF, o nome do plugin específico e apenas o URL opt-in desse site.
+8. Testar submissão, email de opt-in, confirmação, redirect final, ausência do email adicional, campanha de teste, fila e bounces.
 
 Os testes automatizados carregam as duas classes reais em PHP 7.2, confirmam os destinos fixos e verificam que cada mapa pós-submissão rejeita uma page exclusiva da outra instalação.
