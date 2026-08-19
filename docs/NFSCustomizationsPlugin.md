@@ -144,3 +144,7 @@ Na atualização `3.6.16` → `3.6.17`, o upstream alterou `admins.php`, `bounce
 8. Testar submissão, email de opt-in, confirmação, redirect final, ausência do email adicional, campanha de teste, fila e bounces.
 
 Os testes automatizados carregam as duas classes reais em PHP 7.2, confirmam os destinos fixos e verificam que cada mapa pós-submissão rejeita uma page exclusiva da outra instalação.
+
+## Estado de produção
+
+Em `2026-08-19`, os dois sites receberam o código phpList `3.6.17` e o respetivo plugin exclusivo `0.3.0`. SimulaçãoCreditoPessoal/Saldo tem também a BD atualizada para `3.6.17`. No SegurosMais, o admin ainda deve executar `Upgrade` para passar a marca da BD de `3.6.16` para `3.6.17`; o código público, o plugin e o `VERSION` já estão em `3.6.17`.
