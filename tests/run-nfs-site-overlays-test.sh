@@ -25,14 +25,21 @@ run_variant() {
 }
 
 run_variant \
-    deploy/segurosmais/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php \
+    deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php \
     https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/ \
     5 \
     https://segurosmais.pt/resultado/automovel/ \
     14
 
 run_variant \
-    deploy/simulacaocreditopessoal/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php \
+    deploy/simulacaocreditopessoal/lists/admin/plugins/NFSCustomizationsPlugin.php \
+    https://saldo.pt/simuladores/obrigado-confirmacao \
+    14 \
+    https://creditosim.pt/resultado/credito-pessoal/ \
+    5
+
+run_variant \
+    deploy/saldo/lists/admin/plugins/NFSCustomizationsPlugin.php \
     https://saldo.pt/simuladores/obrigado-confirmacao \
     14 \
     https://creditosim.pt/resultado/credito-pessoal/ \

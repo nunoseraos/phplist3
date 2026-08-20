@@ -6,10 +6,10 @@ if (!defined('PHPLISTINIT')) {
 
 class NFSCustomizationsPlugin extends phplistPlugin
 {
-    public $name = 'NFS Customizations';
-    public $version = '0.2.2';
+    public $name = 'NFS Customizations - SimulacaoCreditoPessoal';
+    public $version = '0.3.0';
     public $authors = 'NFS';
-    public $description = 'Reusable customizations for NFS phpList upgrades.';
+    public $description = 'Customizations exclusive to SimulacaoCreditoPessoal.';
     public $coderoot = 'plugins/NFSCustomizationsPlugin/';
     public $topMenuLinks = array(
         'nfs_shortcuts' => array('category' => 'subscribers'),
@@ -19,83 +19,11 @@ class NFSCustomizationsPlugin extends phplistPlugin
     );
 
     private $defaultThankyouRedirects = array(
-        5  => 'https://segurosmais.pt/resultado/automovel/',
-        6  => 'https://segurosmais.pt/resultado/saude/',
-        7  => 'https://segurosmais.pt/resultado/dentario/',
-        8  => 'https://segurosmais.pt/resultado/vida/',
-        9  => 'https://segurosmais.pt/resultado/bem-vindo/',
-        10 => 'https://segurosmais.pt/resultado/casa/',
-        11 => 'https://segurosmais.pt/resultado/protecao-ao-credito/',
-        12 => 'https://segurosmais.pt/resultado/credito-pessoal/',
-        13 => 'https://segurosmais.pt/resultado/credito-consolidado/',
-        18 => 'https://creditoacertado.pt/resultado/credito-pessoal/',
+        14  => 'https://creditosim.pt/resultado/credito-pessoal/',
+        18  => 'https://creditoacertado.pt/resultado/credito-pessoal/',
     );
 
-    private $thankyouRedirectsByProfile = array(
-        'segurosmais' => array(
-            5  => 'https://segurosmais.pt/resultado/automovel/',
-            6  => 'https://segurosmais.pt/resultado/saude/',
-            7  => 'https://segurosmais.pt/resultado/dentario/',
-            8  => 'https://segurosmais.pt/resultado/vida/',
-            9  => 'https://segurosmais.pt/resultado/bem-vindo/',
-            10 => 'https://segurosmais.pt/resultado/casa/',
-            11 => 'https://segurosmais.pt/resultado/protecao-ao-credito/',
-            12 => 'https://segurosmais.pt/resultado/credito-pessoal/',
-            13 => 'https://segurosmais.pt/resultado/credito-consolidado/',
-            18 => 'https://creditoacertado.pt/resultado/credito-pessoal/',
-        ),
-        'credito_saldo' => array(
-            14 => 'https://creditosim.pt/resultado/credito-pessoal/',
-            18 => 'https://creditoacertado.pt/resultado/credito-pessoal/',
-        ),
-    );
-
-    private $defaultConfirmationRedirects = array(
-        1  => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-        5  => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-        6  => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-        7  => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-        8  => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-        9  => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-        10 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-        11 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-        12 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-        13 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-        14 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-        18 => 'https://creditoacertado.pt/welcome-simulacoes/',
-        // 999 = s01-dividas · 1000 = s02-posso-comprar.
-        // A entrada 1001 foi removida em 2026-08-18: essa subscribe page nunca
-        // chegou a existir na instalação (`phplist_subscribepage` só tem
-        // 2, 3, 14, 18, 999 e 1000). Um id inexistente faz o phpList cair na
-        // página por omissão, que mostra as 12 listas e todos os atributos.
-        999 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
-        1000 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
-    );
-
-    private $confirmationRedirectsByProfile = array(
-        'segurosmais' => array(
-            1  => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-            5  => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-            6  => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-            7  => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-            8  => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-            9  => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-            10 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-            11 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-            12 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-            13 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-            14 => 'https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/',
-            18 => 'https://creditoacertado.pt/welcome-simulacoes/',
-            999 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
-            1000 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
-        ),
-        'credito_saldo' => array(
-            14 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
-            18 => 'https://creditoacertado.pt/welcome-simulacoes/',
-            999 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
-            1000 => 'https://saldo.pt/simuladores/obrigado-confirmacao',
-        ),
-    );
+    private $defaultConfirmationRedirectUrl = 'https://saldo.pt/simuladores/obrigado-confirmacao';
 
     // Páginas em que o email "a sua subscrição foi confirmada" do phpList é
     // suprimido. Depois do duplo opt-in o subscritor já é reencaminhado para a
@@ -104,7 +32,7 @@ class NFSCustomizationsPlugin extends phplistPlugin
     // As páginas do Saldo (999, 1000) faltavam aqui: eram as únicas de
     // toda a instalação a enviá-lo.
     private $defaultSuppressPostConfirmMailPages = array(
-        1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18, 999, 1000,
+        14, 18, 999, 1000,
     );
 
     public function activate()
@@ -189,14 +117,9 @@ class NFSCustomizationsPlugin extends phplistPlugin
         return $this->shouldSuppressPostConfirmMail((int) $subscribepageID);
     }
 
-    public function confirmationRedirectUrl($subscribepageID)
+    public function confirmationRedirectUrl()
     {
-        return $this->redirectUrlForPage(
-            $subscribepageID,
-            'NFS_CONFIRMATION_REDIRECTS',
-            $this->defaultConfirmationRedirects,
-            $this->confirmationRedirectsByProfile
-        );
+        return $this->defaultConfirmationRedirectUrl;
     }
 
     public function parseOutgoingTextMessage($messageid, $content, $destination, $userdata = null)
@@ -555,15 +478,14 @@ class NFSCustomizationsPlugin extends phplistPlugin
         return $this->redirectUrlForPage(
             $pageid,
             'NFS_THANKYOU_REDIRECTS',
-            $this->defaultThankyouRedirects,
-            $this->thankyouRedirectsByProfile
+            $this->defaultThankyouRedirects
         );
     }
 
-    private function redirectUrlForPage($pageid, $overrideConstant, $defaultRedirects, $profileRedirects)
+    private function redirectUrlForPage($pageid, $overrideConstant, $defaultRedirects)
     {
         $pageid = (int) $pageid;
-        $redirects = $this->redirectsForCurrentProfile($defaultRedirects, $profileRedirects);
+        $redirects = $defaultRedirects;
         if (defined($overrideConstant)) {
             $configuredRedirects = constant($overrideConstant);
             if (is_array($configuredRedirects)) {
@@ -575,68 +497,7 @@ class NFSCustomizationsPlugin extends phplistPlugin
             return '';
         }
 
-        $url = trim((string) $redirects[$pageid]);
-        if ($url === '') {
-            return '';
-        }
-
-        return $url;
-    }
-
-    private function redirectsForCurrentProfile($defaultRedirects, $profileRedirects)
-    {
-        $profile = $this->siteProfile();
-        if (isset($profileRedirects[$profile]) && is_array($profileRedirects[$profile])) {
-            return $profileRedirects[$profile];
-        }
-
-        return $defaultRedirects;
-    }
-
-    private function siteProfile()
-    {
-        $profile = defined('NFS_SITE_PROFILE')
-            ? strtolower(trim((string) constant('NFS_SITE_PROFILE')))
-            : $this->detectSiteProfile();
-
-        $aliases = array(
-            'credito' => 'credito_saldo',
-            'creditosim' => 'credito_saldo',
-            'saldo' => 'credito_saldo',
-            'seguros' => 'segurosmais',
-            'escolhas' => 'segurosmais',
-        );
-
-        if (isset($aliases[$profile])) {
-            return $aliases[$profile];
-        }
-
-        return $profile !== '' ? $profile : 'segurosmais';
-    }
-
-    private function detectSiteProfile()
-    {
-        $signals = array();
-        if (defined('PHPMAILERHOST')) {
-            $signals[] = strtolower((string) constant('PHPMAILERHOST'));
-        }
-        if (defined('ACCESS_CONTROL_ALLOW_ORIGINS') && is_array(constant('ACCESS_CONTROL_ALLOW_ORIGINS'))) {
-            foreach (constant('ACCESS_CONTROL_ALLOW_ORIGINS') as $origin) {
-                $signals[] = strtolower((string) $origin);
-            }
-        }
-        if (function_exists('getConfig')) {
-            $signals[] = strtolower((string) getConfig('website'));
-        }
-
-        $combined = implode(' ', $signals);
-        if (strpos($combined, 'simulacaocreditopessoal.com') !== false
-            || strpos($combined, 'creditosim.pt') !== false
-            || strpos($combined, 'saldo.pt') !== false) {
-            return 'credito_saldo';
-        }
-
-        return 'segurosmais';
+        return trim((string) $redirects[$pageid]);
     }
 
     private function shouldSuppressPostConfirmMail($pageid)

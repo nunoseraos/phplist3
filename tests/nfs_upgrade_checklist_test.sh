@@ -13,7 +13,8 @@ fi
 
 grep -Fq "MISS  legacy/__missing_baseline__/index.php" "$OUTPUT_FILE"
 grep -Fq "OK    public_html/lists/index.php" "$OUTPUT_FILE"
-grep -Fq "OK    deploy/segurosmais/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php" "$OUTPUT_FILE"
-grep -Fq "OK    deploy/simulacaocreditopessoal/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php" "$OUTPUT_FILE"
+grep -Fq "OK    deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php" "$OUTPUT_FILE"
+grep -Fq "OK    deploy/simulacaocreditopessoal/lists/admin/plugins/NFSCustomizationsPlugin.php" "$OUTPUT_FILE"
+grep -Fq "OK    deploy/saldo/lists/admin/plugins/NFSCustomizationsPlugin.php" "$OUTPUT_FILE"
 
 echo "upgrade checklist behavior ok"

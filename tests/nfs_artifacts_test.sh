@@ -2,40 +2,38 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ARTIFACT_ROOT="$ROOT_DIR/.artifacts"
-segurosmais="$ARTIFACT_ROOT/phplist-3.6.17-segurosmais"
-saldo="$ARTIFACT_ROOT/phplist-3.6.17-simulacaocreditopessoal"
-segurosmais_url="https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/"
-saldo_url="https://saldo.pt/simuladores/obrigado-confirmacao"
+COMMON="$ROOT_DIR/deploy/common"
+SEGUROSMAIS="$ROOT_DIR/deploy/segurosmais"
+SCP="$ROOT_DIR/deploy/simulacaocreditopessoal"
+SALDO="$ROOT_DIR/deploy/saldo"
 
 fail() {
     echo "FAIL  $1" >&2
     exit 1
 }
 
-for artifact in "$segurosmais" "$saldo"; do
-    [[ -f "$artifact/VERSION" ]] || fail "$artifact has no VERSION"
-    grep -Fq 'VERSION=3.6.17' "$artifact/VERSION" || fail "$artifact has the wrong VERSION"
-    [[ -f "$artifact/public_html/lists/index.php" ]] || fail "$artifact has no public index"
-    [[ -f "$artifact/public_html/lists/admin/index.php" ]] || fail "$artifact has no admin index"
-    [[ ! -e "$artifact/public_html/lists/config/config.php" ]] || fail "$artifact contains deployable config.php"
-    [[ ! -e "$artifact/public_html/lists/config/config_extended.php" ]] || fail "$artifact contains deployable config_extended.php"
+[[ -f "$COMMON/VERSION" ]] || fail "common deploy has no VERSION"
+grep -Fq 'VERSION=3.6.17' "$COMMON/VERSION" || fail "common deploy has the wrong VERSION"
+[[ -f "$COMMON/lists/index.php" ]] || fail "common deploy has no public index"
+[[ -f "$COMMON/lists/admin/index.php" ]] || fail "common deploy has no admin index"
+[[ ! -e "$COMMON/lists/config/config.php" ]] || fail "common deploy contains a site config.php"
+[[ -f "$COMMON/lists/config/config_extended.php" ]] || fail "common deploy lost the upstream config reference"
+[[ ! -e "$COMMON/lists/admin/plugins/NFSCustomizationsPlugin.php" ]] || fail "common deploy contains a site plugin"
+[[ ! -e "$COMMON/lists/admin/plugins/NFSCustomizationsPlugin" ]] || fail "common deploy contains site plugin files"
+[[ -s "$ROOT_DIR/deploy/common.sha256" ]] || fail "common deploy manifest is absent"
+
+for overlay in "$SEGUROSMAIS" "$SCP" "$SALDO"; do
+    [[ -f "$overlay/lists/admin/plugins/NFSCustomizationsPlugin.php" ]] \
+        || fail "$overlay has no plugin"
+    [[ -f "$overlay/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php" ]] \
+        || fail "$overlay has no plugin shortcuts"
+    [[ -f "$overlay/lists/config/config.php.example" ]] \
+        || fail "$overlay has no config.php.example"
 done
 
-segurosmais_plugin="$segurosmais/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php"
-saldo_plugin="$saldo/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php"
+cmp -s \
+    "$SCP/lists/admin/plugins/NFSCustomizationsPlugin.php" \
+    "$SALDO/lists/admin/plugins/NFSCustomizationsPlugin.php" \
+    || fail "Saldo must initially use an independent copy of the SCP plugin"
 
-cmp -s "$segurosmais_plugin" "$ROOT_DIR/deploy/segurosmais/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php" \
-    || fail "SegurosMais artefact does not contain its exact overlay"
-cmp -s "$saldo_plugin" "$ROOT_DIR/deploy/simulacaocreditopessoal/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php" \
-    || fail "Saldo artefact does not contain its exact overlay"
-
-grep -Fq "$segurosmais_url" "$segurosmais_plugin" || fail "SegurosMais destination is absent"
-! grep -Fq "$saldo_url" "$segurosmais_plugin" || fail "SegurosMais artefact contains the Saldo destination"
-grep -Fq "$saldo_url" "$saldo_plugin" || fail "Saldo destination is absent"
-! grep -Fq "$segurosmais_url" "$saldo_plugin" || fail "Saldo artefact contains the SegurosMais destination"
-
-[[ -s "$ARTIFACT_ROOT/phplist-3.6.17-segurosmais.sha256" ]] || fail "SegurosMais manifest is absent"
-[[ -s "$ARTIFACT_ROOT/phplist-3.6.17-simulacaocreditopessoal.sha256" ]] || fail "Saldo manifest is absent"
-
-echo "site artefacts ok"
+echo "common core and three site overlays ok"

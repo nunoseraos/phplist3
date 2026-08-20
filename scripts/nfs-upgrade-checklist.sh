@@ -30,12 +30,12 @@ target_files=(
 )
 
 plugin_files=(
-  "public_html/lists/admin/plugins/NFSCustomizationsPlugin.php"
-  "public_html/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php"
-  "deploy/segurosmais/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php"
-  "deploy/segurosmais/public_html/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php"
-  "deploy/simulacaocreditopessoal/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php"
-  "deploy/simulacaocreditopessoal/public_html/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php"
+  "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php"
+  "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php"
+  "deploy/simulacaocreditopessoal/lists/admin/plugins/NFSCustomizationsPlugin.php"
+  "deploy/simulacaocreditopessoal/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php"
+  "deploy/saldo/lists/admin/plugins/NFSCustomizationsPlugin.php"
+  "deploy/saldo/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php"
 )
 
 hook_checks=(
@@ -48,17 +48,17 @@ hook_checks=(
   "public_html/lists/admin/lib.php|Skipping login notification for admin"
   "public_html/lists/admin/pluginlib.php|NFSCustomizationsPlugin"
   "public_html/lists/admin/spageedit.php|hidePostConfirmationMessageFields"
-  "public_html/lists/admin/plugins/NFSCustomizationsPlugin.php|autoSuppressHardFailuresFromEventLog"
-  "public_html/lists/admin/plugins/NFSCustomizationsPlugin.php|monitorQueueHealthAndNotify"
-  "public_html/lists/admin/plugins/NFSCustomizationsPlugin.php|subscriberConfirmation("
-  "public_html/lists/admin/plugins/NFSCustomizationsPlugin.php|confirmationRedirectUrl("
-  "public_html/lists/admin/plugins/NFSCustomizationsPlugin.php|hidePostConfirmationMessageFields("
-  "public_html/lists/admin/plugins/NFSCustomizationsPlugin.php|shouldSuppressPostConfirmMail("
-  "public_html/lists/admin/plugins/NFSCustomizationsPlugin.php|NFS_SUPPRESS_POST_CONFIRMATION_EMAIL"
-  "public_html/lists/admin/plugins/NFSCustomizationsPlugin.php|NFS_SITE_PROFILE"
+  "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php|autoSuppressHardFailuresFromEventLog"
+  "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php|monitorQueueHealthAndNotify"
+  "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php|subscriberConfirmation("
+  "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php|confirmationRedirectUrl("
+  "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php|hidePostConfirmationMessageFields("
+  "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php|shouldSuppressPostConfirmMail("
+  "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php|NFS_SUPPRESS_POST_CONFIRMATION_EMAIL"
   "public_html/lists/index.php|confirmationRedirectUrl"
-  "deploy/segurosmais/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php|https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/"
-  "deploy/simulacaocreditopessoal/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php|https://saldo.pt/simuladores/obrigado-confirmacao"
+  "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php|https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/"
+  "deploy/simulacaocreditopessoal/lists/admin/plugins/NFSCustomizationsPlugin.php|https://saldo.pt/simuladores/obrigado-confirmacao"
+  "deploy/saldo/lists/admin/plugins/NFSCustomizationsPlugin.php|https://saldo.pt/simuladores/obrigado-confirmacao"
 )
 
 echo "== Legacy baseline (${LEGACY_DIR}) =="
@@ -124,7 +124,7 @@ cat <<'EOF'
 1. Sync upstream on main and update custom branch.
 2. Run this checklist script.
 3. Run tests/run-nfs-site-overlays-test.sh.
-4. Select and apply exactly one site overlay in staging.
+4. Generate deploy/common and apply exactly one of the three site overlays.
 5. Ensure the site-specific "NFS Customizations" plugin is enabled in phpList admin.
 6. Execute end-to-end tests:
    - subscribe + ajax subscribe
