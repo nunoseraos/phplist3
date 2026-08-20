@@ -34,12 +34,14 @@ assert_contains "public_html/lists/admin/sendemaillib.php" "parseOutgoingTextMes
 assert_contains "public_html/lists/admin/sendemaillib.php" "parseOutgoingHTMLMessage" "HTML output hook remains installed"
 assert_contains "public_html/lists/admin/spageedit.php" "hidePostConfirmationMessageFields" "subscribe-page editor hook remains installed"
 
-segurosmais_plugin="deploy/segurosmais/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php"
-saldo_plugin="deploy/simulacaocreditopessoal/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php"
+segurosmais_plugin="deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php"
+scp_plugin="deploy/simulacaocreditopessoal/lists/admin/plugins/NFSCustomizationsPlugin.php"
+saldo_plugin="deploy/saldo/lists/admin/plugins/NFSCustomizationsPlugin.php"
 segurosmais_url="https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/"
 saldo_url="https://saldo.pt/simuladores/obrigado-confirmacao"
 
 assert_contains "$segurosmais_plugin" "$segurosmais_url" "SegurosMais overlay has its fixed opt-in destination"
+assert_contains "$scp_plugin" "$saldo_url" "SimulacaoCreditoPessoal overlay has its fixed opt-in destination"
 assert_contains "$saldo_plugin" "$saldo_url" "Saldo overlay has its fixed opt-in destination"
 
 if grep -Fq "$saldo_url" "$segurosmais_plugin"; then
@@ -49,11 +51,13 @@ else
     echo "OK    SegurosMais overlay excludes the Saldo opt-in destination"
 fi
 
-if grep -Fq "$segurosmais_url" "$saldo_plugin"; then
-    echo "FAIL  Saldo overlay contains the SegurosMais opt-in destination" >&2
-    status=1
-else
-    echo "OK    Saldo overlay excludes the SegurosMais opt-in destination"
-fi
+for credit_plugin in "$scp_plugin" "$saldo_plugin"; do
+    if grep -Fq "$segurosmais_url" "$credit_plugin"; then
+        echo "FAIL  $credit_plugin contains the SegurosMais opt-in destination" >&2
+        status=1
+    else
+        echo "OK    $credit_plugin excludes the SegurosMais opt-in destination"
+    fi
+done
 
 exit "$status"

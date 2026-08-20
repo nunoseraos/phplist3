@@ -22,13 +22,12 @@ tests/output/
 *.env
 .local
 public_html/images/
-.artifacts/
-.staging/
 deploy/common/
 deploy/common.sha256
 deploy/*/lists/config/config.php
+deploy/*/lists/admin/plugins/*
+!deploy/*/lists/admin/plugins/NFSCustomizationsPlugin.php
+!deploy/*/lists/admin/plugins/NFSCustomizationsPlugin/
+!deploy/*/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php
 _workbench/
-
-# Legacy snapshots may contain real credentials.
-legacy/**/config/config.php
-legacy/**/config/config_extended.php
+upstream-packages/

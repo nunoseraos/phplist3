@@ -15,6 +15,7 @@ Instalações atuais:
 ```text
 NFSlist/
 ├── public_html/lists/                 # fonte canónica do núcleo comum
+├── upstream-packages/                 # distribuição oficial completa, local e ignorada
 ├── deploy/
 │   ├── common/                        # núcleo gerado, pronto para FTP
 │   │   ├── VERSION
@@ -36,20 +37,21 @@ NFSlist/
 └── docs/                              # documentação NFS
 ```
 
-`public_html/lists/` continua a ser a fonte canónica porque conserva a estrutura oficial do projeto phpList e permite integrar versões futuras com menos conflitos. `deploy/common/` é gerado a partir dessa fonte para utilização por FTP e não deve ser editado manualmente.
+`public_html/lists/` continua a ser a fonte canónica porque conserva a estrutura oficial do projeto phpList e permite integrar versões futuras com menos conflitos. Como os arquivos de código do GitHub não incluem todas as dependências de produção, o gerador começa numa distribuição oficial completa guardada em `upstream-packages/` e aplica por cima a fonte canónica atualizada. `deploy/common/` é o resultado pronto para FTP e não deve ser editado manualmente.
 
 ## Núcleo comum
 
 O núcleo contém:
 
 - todos os ficheiros oficiais da versão phpList em uso;
+- dependências de produção, interface administrativa e idiomas incluídos na distribuição oficial;
 - os hooks e patches NFS que são necessários em todas as instalações;
 - bibliotecas, assets e restantes ficheiros iguais nos três sites.
 
 O núcleo não contém:
 
 - `lists/config/config.php`;
-- a variante de `NFSCustomizationsPlugin`;
+- toda a pasta `lists/admin/plugins/`, porque as instalações usam conjuntos e versões diferentes;
 - uploads, anexos, ficheiros temporários ou dados criados em produção;
 - credenciais de FTP.
 
@@ -63,9 +65,10 @@ Regras:
 
 1. Cada instalação tem o seu próprio `config.php`.
 2. Cada instalação tem uma cópia independente do plugin, mesmo quando duas variantes começam iguais.
-3. Uma alteração específica nunca é feita no núcleo comum.
-4. Um ficheiro só passa para o núcleo quando for comprovadamente igual e necessário nas três instalações.
-5. O plugin de `saldo` começa igual ao de `simulacaocreditopessoal`, mas pode evoluir separadamente.
+3. Cada overlay contém o conjunto completo de plugins de produção compatível com essa instalação.
+4. Uma alteração específica nunca é feita no núcleo comum.
+5. Um ficheiro só passa para o núcleo quando for comprovadamente igual e necessário nas três instalações.
+6. O conjunto de plugins de `saldo` começa igual ao de `simulacaocreditopessoal`, mas pode evoluir separadamente.
 
 Os `config.php` reais ficam no workspace para poderem ser revistos e enviados por FTP, mas são ignorados pelo Git porque contêm passwords. Para documentar a estrutura sem expor segredos, cada instalação pode ter um `config.php.example` versionado.
 
@@ -89,43 +92,35 @@ deploy/saldo/   -> mesma raiz FTP, por cima do núcleo
 ## Atualização para uma nova versão do phpList
 
 1. Obter e verificar a versão oficial pretendida.
-2. Integrá-la em `public_html/lists/`.
-3. Reaplicar e testar apenas os hooks NFS comuns.
-4. Não alterar automaticamente os overlays das instalações.
-5. Gerar novamente `deploy/common/` e os manifestos de verificação.
-6. Testar o núcleo com cada um dos três overlays.
-7. Fazer backup de ficheiros e base de dados antes do deploy.
-8. Publicar primeiro o núcleo e depois o overlay correto.
+2. Guardar em `upstream-packages/` a distribuição completa de produção e o respetivo checksum oficial.
+3. Integrar a fonte da nova versão em `public_html/lists/`.
+4. Reaplicar e testar apenas os hooks NFS comuns.
+5. Não alterar automaticamente os overlays das instalações.
+6. Gerar novamente `deploy/common/` e os manifestos de verificação.
+7. Testar o núcleo com cada um dos três overlays.
+8. Fazer backup de ficheiros e base de dados antes do deploy.
+9. Publicar primeiro o núcleo e depois o overlay correto.
 
-## Limpeza proposta do repositório
+## Estado local e arquivo da limpeza
 
-Depois de a nova estrutura estar criada e validada, podem ser removidos do workspace:
+Em `2026-08-20`, o material histórico e redundante foi retirado do workspace e preservado em:
 
-- `_inputs/` e `_workbench/`: ficheiros temporários já analisados;
-- `inputs/`: ZIP e DOCX históricos já incorporados nas customizações;
-- `legacy/`: snapshot 3.6.14 já analisado;
-- `database/`: dump SQL e análise histórica; devem ser arquivados fora do repositório antes da remoção;
-- `docs/backups/`: cópias antigas de plugin e configuração; devem ser arquivadas fora do repositório;
-- `DOCUMENTACAO.md`: documento antigo e desatualizado;
-- `doc/credito-saldo-migration-map.md`;
-- `doc/estado-atual-e-upgrade-2-sites.md`;
-- `doc/nfs-customizations-map.md`;
-- `doc/phplist-upgrade-upload-runbook.md`;
-- `doc/Log of events.pdf`;
-- `docs/superpowers/`: planos internos de implementação já concluídos;
-- todos os `.DS_Store`;
-- a estrutura antiga `deploy/*/public_html/lists`, depois de migrada para `deploy/*/lists`;
-- o plugin genérico em `public_html/lists/admin/plugins/NFSCustomizationsPlugin*`, depois de as três variantes estarem nos overlays;
-- a worktree temporária `.worktrees/NFSlist-phplist-3.6.17`, depois de integrar o branch da atualização;
-- ficheiros privados antigos `scripts/deploy-ftps*.env`, depois de migrar qualquer credencial ainda necessária para a estrutura local ignorada pelo Git.
+```text
+/Users/nunosoares/Dev/NFSlist-backups/20260820-repository-cleanup/
+```
 
-Devem permanecer:
+O arquivo conserva os caminhos relativos, os ficheiros únicos da worktree removida e um manifesto SHA-256. A worktree temporária foi eliminada depois de o branch `upgrade/phplist-3.6.17` ser integrado em `custom`.
 
-- `.git/`, `.github/` e metadados necessários ao versionamento;
+Permanecem no workspace:
+
 - `public_html/lists/`, como fonte do núcleo comum;
-- `deploy/common/` gerado e os três overlays;
-- `scripts/` e `tests/` necessários para atualizar e validar;
-- `docs/ESTRATEGIA-DEPLOY.md` e `docs/NFSCustomizationsPlugin.md`;
-- documentação e ficheiros oficiais do phpList necessários para manter o fork e integrar novas versões.
+- `upstream-packages/`, com a distribuição oficial completa usada pelo gerador;
+- `deploy/common/` gerado e ignorado pelo Git;
+- os três overlays e respetivos `config.php.example`;
+- os conjuntos completos de plugins de produção nos respetivos overlays, ignorados pelo Git exceto o plugin NFS versionado;
+- os `config.php` reais de SegurosMais e SimulaçãoCreditoPessoal, ignorados pelo Git;
+- o caminho preparado para o novo `config.php` independente de Saldo;
+- scripts, testes e os dois documentos canónicos;
+- `_workbench/`, como documentação privada permanente do utilizador, sempre ignorada pelo Git.
 
-Nenhuma limpeza deve usar `git clean` de forma genérica, porque os `config.php` reais e outros ficheiros privados são deliberadamente ignorados pelo Git. A remoção deve ser feita apenas sobre caminhos explicitamente aprovados.
+Nunca executar `git clean` de forma genérica neste repositório: os `config.php` reais e outros ficheiros privados são deliberadamente ignorados pelo Git.

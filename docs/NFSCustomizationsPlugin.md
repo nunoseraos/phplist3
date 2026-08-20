@@ -1,14 +1,15 @@
 # NFSCustomizationsPlugin
 
-Documento canónico das customizações NFS ao phpList e das diferenças entre os dois artefactos de deployment. A integração atual usa phpList `3.6.17` e `NFSCustomizationsPlugin` `0.3.0`.
+Documento canónico das customizações NFS ao phpList e das diferenças entre os três overlays de deployment. A integração atual usa phpList `3.6.17` e `NFSCustomizationsPlugin` `0.3.0`.
 
 ## Variantes
 
-Existem dois plugins independentes, ambos na versão `0.3.0`:
+Existem três plugins independentes, todos na versão `0.3.0`:
 
 ```text
-deploy/segurosmais/public_html/lists/admin/plugins/
-deploy/simulacaocreditopessoal/public_html/lists/admin/plugins/
+deploy/segurosmais/lists/admin/plugins/
+deploy/simulacaocreditopessoal/lists/admin/plugins/
+deploy/saldo/lists/admin/plugins/
 ```
 
 Cada pasta contém:
@@ -18,9 +19,9 @@ NFSCustomizationsPlugin.php
 NFSCustomizationsPlugin/nfs_shortcuts.php
 ```
 
-Nunca se devem publicar os dois overlays na mesma instalação. A base `public_html/lists` é comum; em staging, deve ser sobreposta apenas pela variante do site de destino.
+Nunca se deve publicar mais do que um overlay na mesma instalação. `deploy/common/` contém o núcleo para FTP e deve ser sobreposto apenas pela variante do site de destino.
 
-As fontes remotas verificadas antes da separação eram SegurosMais `0.2.1` e SimulaçãoCreditoPessoal `0.2.2`. Os dois `nfs_shortcuts.php` eram idênticos.
+As fontes remotas verificadas antes da separação eram SegurosMais `0.2.1` e SimulaçãoCreditoPessoal `0.2.2`. Os `nfs_shortcuts.php` eram idênticos. A variante `saldo` começou como cópia independente da variante SimulaçãoCreditoPessoal para poder divergir futuramente.
 
 ## Diferenças entre variantes
 
@@ -32,6 +33,7 @@ O retorno é fixo por instalação. Não recebe nem consulta o ID da subscribe p
 |---|---|
 | SegurosMais | `https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/` |
 | SimulaçãoCreditoPessoal | `https://saldo.pt/simuladores/obrigado-confirmacao` |
+| Saldo | `https://saldo.pt/simuladores/obrigado-confirmacao` |
 
 O hook comum em `public_html/lists/index.php` chama `confirmationRedirectUrl()` sem argumentos.
 
@@ -53,6 +55,8 @@ Estes redirects continuam filtrados por subscribe page porque correspondem a res
 | SegurosMais | `18` | `https://creditoacertado.pt/resultado/credito-pessoal/` |
 | SimulaçãoCreditoPessoal | `14` | `https://creditosim.pt/resultado/credito-pessoal/` |
 | SimulaçãoCreditoPessoal | `18` | `https://creditoacertado.pt/resultado/credito-pessoal/` |
+| Saldo | `14` | `https://creditosim.pt/resultado/credito-pessoal/` |
+| Saldo | `18` | `https://creditoacertado.pt/resultado/credito-pessoal/` |
 
 Uma page não incluída conserva o conteúdo normal de agradecimento do phpList.
 
@@ -62,6 +66,7 @@ O plugin impede o email genérico `confirmationsubject:*`/`confirmationmessage:*
 
 - SegurosMais: pages `1`, `5` a `13` e `18`;
 - SimulaçãoCreditoPessoal: pages `14`, `18`, `999` e `1000`.
+- Saldo: começa com as pages `14`, `18`, `999` e `1000`, numa cópia independente.
 
 ## Todas as customizações do plugin
 
@@ -134,17 +139,22 @@ Na atualização `3.6.16` → `3.6.17`, o upstream alterou `admins.php`, `bounce
 
 ## Deployment e verificação
 
-1. Executar `./scripts/build-nfs-site-artifacts.sh`; são geradas árvores e manifestos SHA-256 separados em `.artifacts/`.
+1. Confirmar a distribuição completa verificada em `upstream-packages/` e executar `./scripts/build-nfs-site-artifacts.sh`; são gerados o núcleo `deploy/common/` e o manifesto `deploy/common.sha256`.
 2. Executar `./tests/phplist_3617_upgrade_test.sh`, `./tests/run-nfs-site-overlays-test.sh`, `./tests/nfs_upgrade_checklist_test.sh` e `./tests/nfs_artifacts_test.sh`.
-3. Preservar sempre `config/config.php`, `config/config_extended.php`, uploads, anexos, dados temporários e plugins externos do servidor. Os dois ficheiros de configuração são deliberadamente excluídos dos artefactos.
-4. Fazer lint do artefacto em PHP 7.2 e 8.3 e validar o staging com a versão PHP real do site.
-5. Obter backups verificáveis da pasta remota e da base de dados antes do primeiro upload.
-6. Publicar primeiro o SegurosMais, validar e observar; só depois publicar SimulaçãoCreditoPessoal/Saldo.
-7. Confirmar no remoto `VERSION=3.6.17`, as proteções CSRF, o nome do plugin específico e apenas o URL opt-in desse site.
-8. Testar submissão, email de opt-in, confirmação, redirect final, ausência do email adicional, campanha de teste, fila e bounces.
+3. Confirmar o `config.php` privado em `deploy/<instalação>/lists/config/`. O núcleo exclui esse ficheiro; `config_extended.php` permanece como referência comum porque não é carregado automaticamente.
+4. Confirmar o conjunto completo `lists/admin/plugins/` no overlay. Esta pasta não pertence ao núcleo porque as instalações têm versões diferentes e requisitos PHP distintos.
+5. Fazer lint do núcleo e dos três overlays com a versão PHP real de cada site.
+6. Obter backups verificáveis da pasta remota e da base de dados antes do primeiro upload.
+7. Publicar `deploy/common/` e depois exatamente um dos overlays `segurosmais`, `simulacaocreditopessoal` ou `saldo`.
+8. Confirmar no remoto `VERSION=3.6.17`, as proteções CSRF, o nome do plugin específico e apenas o URL opt-in desse site.
+9. Testar submissão, email de opt-in, confirmação, redirect final, ausência do email adicional, campanha de teste, fila e bounces.
 
-Os testes automatizados carregam as duas classes reais em PHP 7.2, confirmam os destinos fixos e verificam que cada mapa pós-submissão rejeita uma page exclusiva da outra instalação.
+Os testes automatizados carregam as três classes reais em PHP 7.2, confirmam os destinos fixos e verificam que cada mapa pós-submissão rejeita uma page exclusiva da outra variante.
 
 ## Estado de produção
 
-Em `2026-08-19`, os dois sites receberam o código phpList `3.6.17` e o respetivo plugin exclusivo `0.3.0`. SimulaçãoCreditoPessoal/Saldo tem também a BD atualizada para `3.6.17`. No SegurosMais, o admin ainda deve executar `Upgrade` para passar a marca da BD de `3.6.16` para `3.6.17`; o código público, o plugin e o `VERSION` já estão em `3.6.17`.
+Em `2026-08-19`, SegurosMais e SimulaçãoCreditoPessoal receberam o código phpList `3.6.17` e o respetivo plugin exclusivo `0.3.0`. SimulaçãoCreditoPessoal tem também a BD atualizada para `3.6.17`. No SegurosMais, o admin ainda deve executar `Upgrade` para passar a marca da BD de `3.6.16` para `3.6.17`; o código público, o plugin e o `VERSION` já estão em `3.6.17`.
+
+Em `2026-08-20`, foi criado o overlay local independente `saldo`, inicialmente igual ao de SimulaçãoCreditoPessoal. A instalação `simulacoes.saldo.pt` ainda precisa do seu `deploy/saldo/lists/config/config.php` próprio; esse ficheiro não é inventado nem reutilizado de outro site.
+
+Como a tag `3.6.17` não tem um pacote completo de produção, o núcleo atual parte da distribuição oficial SourceForge `3.6.16`, checksum SHA-256 `12c43ef7e1e785b9875e086172cbd15b26cd09d0b1ceb1755abb9ee05c57346c`, e recebe por cima o código `3.6.17` e os hooks comuns NFS. Assim, `deploy/common/` inclui também `base/vendor`, a interface administrativa e as dependências comuns necessárias. Os plugins de produção são completados pelo overlay escolhido.
