@@ -1,0 +1,12 @@
+<?php
+
+// Estrutura sem segredos. O config.php real desta instalação fica ao lado
+// deste ficheiro, é ignorado pelo Git e é aplicado depois do núcleo comum.
+$database_host = 'DATABASE_HOST';
+$database_name = 'DATABASE_NAME_SIMULACAOCREDITOPESSOAL';
+$database_user = 'DATABASE_USER';
+$database_password = 'DATABASE_PASSWORD';
+$pageroot = '/lists';
+
+define('TEST', 1);
+define('PHPMAILERHOST', 'SMTP_HOST_SIMULACAOCREDITOPESSOAL');

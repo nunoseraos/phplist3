@@ -3,47 +3,31 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION_NUMBER="$(sed -n 's/^VERSION=//p' "$ROOT_DIR/VERSION")"
-ARTIFACT_ROOT="$ROOT_DIR/.artifacts"
+COMMON_ROOT="$ROOT_DIR/deploy/common"
+MANIFEST="$ROOT_DIR/deploy/common.sha256"
 
 if [[ "$VERSION_NUMBER" != "3.6.17" ]]; then
     echo "Refusing to build unexpected phpList version: $VERSION_NUMBER" >&2
     exit 1
 fi
 
-mkdir -p "$ARTIFACT_ROOT"
+mkdir -p "$COMMON_ROOT/lists"
 
-build_site() {
-    local site="$1"
-    local artifact="$ARTIFACT_ROOT/phplist-${VERSION_NUMBER}-${site}"
-    local overlay="$ROOT_DIR/deploy/${site}"
-    local manifest="$ARTIFACT_ROOT/phplist-${VERSION_NUMBER}-${site}.sha256"
+rsync -a --delete \
+    --exclude '.DS_Store' \
+    --exclude 'Thumbs.db' \
+    --exclude 'config/config.php' \
+    --exclude 'admin/plugins/NFSCustomizationsPlugin.php' \
+    --exclude 'admin/plugins/NFSCustomizationsPlugin/' \
+    "$ROOT_DIR/public_html/lists/" "$COMMON_ROOT/lists/"
 
-    [[ -f "$overlay/public_html/lists/admin/plugins/NFSCustomizationsPlugin.php" ]] || {
-        echo "Missing plugin overlay for $site" >&2
-        exit 1
-    }
+cp "$ROOT_DIR/VERSION" "$COMMON_ROOT/VERSION"
 
-    rm -rf "$artifact"
-    mkdir -p "$artifact/public_html/lists"
-    rsync -a --delete \
-        --exclude '.DS_Store' \
-        --exclude 'Thumbs.db' \
-        "$ROOT_DIR/public_html/lists/" "$artifact/public_html/lists/"
-    rsync -a "$overlay/" "$artifact/"
-    cp "$ROOT_DIR/VERSION" "$artifact/VERSION"
+(
+    cd "$COMMON_ROOT"
+    find . -type f -exec shasum -a 256 {} \; | LC_ALL=C sort
+) >"$MANIFEST"
 
-    # Production configuration is restored from that site's private backup.
-    rm -f \
-        "$artifact/public_html/lists/config/config.php" \
-        "$artifact/public_html/lists/config/config_extended.php"
-
-    (
-        cd "$artifact"
-        find . -type f -exec shasum -a 256 {} \; | LC_ALL=C sort
-    ) >"$manifest"
-
-    printf 'Built %s (%s files)\n' "$artifact" "$(wc -l <"$manifest" | tr -d ' ')"
-}
-
-build_site "segurosmais"
-build_site "simulacaocreditopessoal"
+printf 'Built %s (%s files)\n' \
+    "$COMMON_ROOT" \
+    "$(wc -l <"$MANIFEST" | tr -d ' ')"

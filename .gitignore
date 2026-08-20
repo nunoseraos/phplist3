@@ -13,9 +13,6 @@ public_html/lists/admin/info/
 public_html/lists/updater
 public_html/lists/texts
 public_html/lists/admin/plugins/*
-!public_html/lists/admin/plugins/NFSCustomizationsPlugin.php
-!public_html/lists/admin/plugins/NFSCustomizationsPlugin/
-!public_html/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php
 /parked/
 public_html/lists/admin/ui/dressprow
 public_html/lists/admin/ui/dressprow-ph
@@ -27,6 +24,10 @@ tests/output/
 public_html/images/
 .artifacts/
 .staging/
+deploy/common/
+deploy/common.sha256
+deploy/*/lists/config/config.php
+_workbench/
 
 # Legacy snapshots may contain real credentials.
 legacy/**/config/config.php
