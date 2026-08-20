@@ -2507,11 +2507,19 @@ and change your password.
 --------------------------------------------------------------------------------  ',
 $GLOBALS['config']['website']);
 
-  $admin_mail = $GLOBALS['admin_auth']->adminEmail($_SESSION['logindetails']['id']);
+  $admin_mail = trim((string) $GLOBALS['admin_auth']->adminEmail($_SESSION['logindetails']['id']));
+  $main_admin_mail = trim((string) getConfig('admin_address'));
+  if ($admin_mail === '') {
+    if ($main_admin_mail === '') {
+      logEvent(sprintf('Skipping login notification for admin %d: no destination email configured', (int) $adminId));
+      return;
+    }
+    $admin_mail = $main_admin_mail;
+  }
+
   $ok = sendMail($admin_mail, $GLOBALS['installation_name'].' '.s('login from new location'), $msg, system_messageheaders($admin_mail));
 
   if ($ok === 0) {
-    $main_admin_mail = getConfig('admin_address');
     logEvent(sprintf('Error sending login notification to %s', $admin_mail));
 
     $msg = s('
@@ -2519,7 +2527,9 @@ $GLOBALS['config']['website']);
     phpList tried sending the below message to '.$admin_mail.'
     but this failed.
 ------------------').PHP_EOL.PHP_EOL.$msg;
-    sendMail($main_admin_mail, $GLOBALS['installation_name'].' '.s('login from new location'), $msg, system_messageheaders($admin_mail));
+    if ($main_admin_mail !== '' && strcasecmp($main_admin_mail, $admin_mail) !== 0) {
+      sendMail($main_admin_mail, $GLOBALS['installation_name'].' '.s('login from new location'), $msg, system_messageheaders($main_admin_mail));
+    }
   }
 
 }

@@ -12,7 +12,10 @@ public_html/lists/admin/info/
 .vagrant
 public_html/lists/updater
 public_html/lists/texts
-public_html/lists/admin/plugins/
+public_html/lists/admin/plugins/*
+!public_html/lists/admin/plugins/NFSCustomizationsPlugin.php
+!public_html/lists/admin/plugins/NFSCustomizationsPlugin/
+!public_html/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php
 /parked/
 public_html/lists/admin/ui/dressprow
 public_html/lists/admin/ui/dressprow-ph
@@ -22,3 +25,9 @@ tests/output/
 *.env
 .local
 public_html/images/
+.artifacts/
+.staging/
+
+# Legacy snapshots may contain real credentials.
+legacy/**/config/config.php
+legacy/**/config/config_extended.php

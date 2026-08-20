@@ -1024,6 +1024,28 @@ function recentlyVisited()
 
         $shade = 0;
         $html .= '<h3>'.$GLOBALS['I18N']->get('Recently visited').'</h3><ul class="recentlyvisited">';
+
+        // NFS quick links kept in the sidebar to speed up frequent admin actions.
+        $quickLinks = array(
+            array('details&pi=SubscribersPlugin', 'Search Subscribers'),
+            array('history&pi=SubscribersPlugin', 'Subscription History'),
+            array('reports&pi=SubscribersPlugin&report=subscriptions', 'Subscription Graph'),
+            array('campaigns&pi=CampaignsPlugin', 'Manage Campaigns'),
+            array('manage&pi=Autoresponder', 'Manage Autoresponders'),
+            array('main&pi=MessageStatisticsPlugin', 'Campaign Statistics'),
+            array('eventlog', 'Log'),
+            array('spage', 'Subscribe pages'),
+            array('reconcileusers', 'Reconcile subscribers'),
+        );
+        foreach ($quickLinks as $quickLink) {
+            // Keep quick links stable across plugin pages; never inherit current `pi`.
+            $link = PageLink2($quickLink[0], $quickLink[1], '', true);
+            if (!empty($link)) {
+                $html .= '<li class="shade'.$shade.'">'.$link.'</li>';
+                $shade = !$shade;
+            }
+        }
+
         $browsetrail = array_unique($_SESSION['browsetrail']);
 
 //    $browsetrail = array_reverse($browsetrail);
@@ -1060,8 +1082,14 @@ function recentlyVisited()
                     if (!empty($urlparams['id'])) {
                         $url .= '&id='.$urlparams['id'];
                     }
-                    //# check for plugin
+                    //# check for plugin, but only keep pi when the page actually belongs to that plugin.
+                    $isPluginPage = false;
                     if (isset($urlparams['pi']) && isset($GLOBALS['plugins'][$urlparams['pi']])) {
+                        $pluginInstance = $GLOBALS['plugins'][$urlparams['pi']];
+                        $pluginPagePath = rtrim($pluginInstance->coderoot, '/').'/'.$p.'.php';
+                        $isPluginPage = is_file($pluginPagePath) || isset($pluginInstance->pageTitles[$p]);
+                    }
+                    if ($isPluginPage) {
                         $url .= '&pi='.$urlparams['pi'];
                         $title = $GLOBALS['plugins'][$urlparams['pi']]->pageTitle($p);
                         $titlehover = $GLOBALS['plugins'][$urlparams['pi']]->pageTitleHover($p);

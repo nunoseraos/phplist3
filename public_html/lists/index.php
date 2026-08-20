@@ -779,6 +779,18 @@ function confirmPage($id)
     $res .= '<p>'.$GLOBALS['PoweredBy'].'</p>';
     $res .= $GLOBALS['pagedata']['footer'];
 
+    // NF07: custom landing pages after double opt-in confirmation.
+    foreach ($GLOBALS['plugins'] as $plugin) {
+        if (!method_exists($plugin, 'confirmationRedirectUrl')) {
+            continue;
+        }
+        $redirectUrl = trim((string) $plugin->confirmationRedirectUrl());
+        if ($redirectUrl !== '') {
+            header('Location: '.$redirectUrl);
+            exit;
+        }
+    }
+
     return $res;
 }
 
