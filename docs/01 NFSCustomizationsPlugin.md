@@ -1,10 +1,10 @@
 # NFSCustomizationsPlugin
 
-Documento canónico das customizações NFS ao phpList e das diferenças entre os três overlays de deployment. A integração atual usa phpList `3.6.17` e `NFSCustomizationsPlugin` `0.3.0`.
+Documento canónico das customizações NFS ao phpList e das diferenças entre os overlays. A integração atual usa phpList `3.7.0` e `NFSCustomizationsPlugin` `0.3.0`.
 
 ## Variantes
 
-Existem três plugins independentes, todos na versão `0.3.0`:
+Existem três plugins independentes, todos na versão `0.3.0`. Saldo e SegurosMais são os overlays operacionais da 3.7.0; SimulaçãoCreditoPessoal fica preservado como referência legada:
 
 ```text
 deploy/segurosmais/lists/admin/plugins/
@@ -19,7 +19,7 @@ NFSCustomizationsPlugin.php
 NFSCustomizationsPlugin/nfs_shortcuts.php
 ```
 
-Nunca se deve publicar mais do que um overlay na mesma instalação. `deploy/common/` contém o núcleo para FTP e deve ser sobreposto apenas pela variante do site de destino.
+Nunca se deve publicar mais do que um overlay na mesma instalação. `deploy/common/root/` contém o núcleo para FTP e deve ser sobreposto apenas pela variante do site de destino.
 
 As fontes remotas verificadas antes da separação eram SegurosMais `0.2.1` e SimulaçãoCreditoPessoal `0.2.2`. Os `nfs_shortcuts.php` eram idênticos. A variante `saldo` começou como cópia independente da variante SimulaçãoCreditoPessoal para poder divergir futuramente.
 
@@ -133,28 +133,36 @@ O plugin depende destes hooks mantidos no fork:
 - `admin/connect.php`: atalhos administrativos;
 - `processqueue`: hard failures e monitorização da fila.
 
-Estes pontos devem ser revistos depois de cada merge com uma nova versão upstream do phpList.
+Estes pontos foram revistos contra o código upstream e o package de produção 3.7.0. Os hooks genéricos de `subscribelib2.php`, `sendemaillib.php`, `defaultplugin.php` e `processqueue.php` já existem no package. Continuam a ser necessários cinco patches NFS próprios:
 
-Na atualização `3.6.16` → `3.6.17`, o upstream alterou `admins.php`, `bouncerules.php` e `massremove.php` para validar tokens CSRF. Nenhuma dessas alterações colide com os hooks NFS. O ficheiro `VERSION` do fork é mantido explicitamente em `3.6.17`, porque a tag oficial contém ainda o marcador `3.6.16`.
+| Ficheiro | Finalidade | Decisão 3.7.0 |
+|---|---|---|
+| `admin/connect.php` | atalhos NFS e correção do `pi` em Recently visited | preservar |
+| `admin/lib.php` | não tentar notificação de login sem email de destino | preservar |
+| `admin/pluginlib.php` | incluir o plugin NFS nos plugins auto-ativáveis | preservar |
+| `admin/spageedit.php` | esconder os campos da mensagem pós-confirmação | reaplicado sobre o código 3.7.0 |
+| `index.php` | redirect final depois do double opt-in | preservar |
+
+O build aplica ainda `admin/bouncerules.php` e `admin/massremove.php` da árvore upstream 3.7.0 porque contêm verificações CSRF posteriores ao conteúdo do package de produção. `admin/init.php` e `admin/structure.php` ficam sempre nas variantes geradas do package; isto garante que o admin apresenta a versão `3.7.0` sem depender de procurar um ficheiro `VERSION` por caminho relativo.
+
+Aplica também `admin/CsvReader.php`: em PHP 8.2, o código oficial deixa de reconhecer ficheiros CSV com line endings `CR`. A correção normaliza apenas separadores de registo, preserva quebras dentro de campos entre aspas e passou os 19 testes PHPUnit, incluindo CR, CRLF e LF.
 
 ## Deployment e verificação
 
-1. Confirmar a distribuição completa verificada em `upstream-packages/` e executar `./scripts/build-nfs-site-artifacts.sh`; são gerados o núcleo `deploy/common/` e o manifesto `deploy/common.sha256`.
-2. Executar `./tests/phplist_3617_upgrade_test.sh`, `./tests/run-nfs-site-overlays-test.sh`, `./tests/nfs_upgrade_checklist_test.sh` e `./tests/nfs_artifacts_test.sh`.
+1. Confirmar as distribuições oficiais verificadas em `upstream-packages/` e executar `./scripts/build-nfs-site-artifacts.sh`; são gerados o núcleo `deploy/common/root/` e o manifesto `deploy/common.sha256`.
+2. Executar `./tests/phplist_370_upgrade_test.sh`, `./tests/run-nfs-site-overlays-test.sh`, `./tests/nfs_upgrade_checklist_test.sh` e `./tests/nfs_artifacts_test.sh`.
 3. Confirmar o `config.php` privado em `deploy/<instalação>/lists/config/`. O núcleo exclui esse ficheiro; `config_extended.php` permanece como referência comum porque não é carregado automaticamente.
 4. Confirmar o conjunto completo `lists/admin/plugins/` no overlay. Esta pasta não pertence ao núcleo porque as instalações têm versões diferentes e requisitos PHP distintos.
-5. Fazer lint do núcleo e dos três overlays com a versão PHP real de cada site.
+5. Fazer lint do núcleo e dos overlays com a versão PHP real de cada site. As dependências incluídas no package phpList 3.7.0 exigem efetivamente PHP 8.2 ou superior.
 6. Obter backups verificáveis da pasta remota e da base de dados antes do primeiro upload.
-7. Publicar `deploy/common/` e depois exatamente um dos overlays `segurosmais`, `simulacaocreditopessoal` ou `saldo`.
-8. Confirmar no remoto `VERSION=3.6.17`, as proteções CSRF, o nome do plugin específico e apenas o URL opt-in desse site.
+7. Publicar o conteúdo de `deploy/common/root/` e depois exatamente um dos overlays `segurosmais` ou `saldo`.
+8. Confirmar no admin `phpList version 3.7.0`, as proteções CSRF, o nome do plugin específico e apenas o URL opt-in desse site.
 9. Testar submissão, email de opt-in, confirmação, redirect final, ausência do email adicional, campanha de teste, fila e bounces.
 
-Os testes automatizados carregam as três classes reais em PHP 7.2, confirmam os destinos fixos e verificam que cada mapa pós-submissão rejeita uma page exclusiva da outra variante.
+Os testes automatizados carregam as classes operacionais reais em PHP 8.2, confirmam os destinos fixos e verificam que cada mapa pós-submissão rejeita uma page exclusiva da outra variante. Foi ainda executado lint de todos os ficheiros dos plugins: 677 ficheiros de Saldo em PHP 8.2 e 624 de SegurosMais em PHP 8.3.
 
 ## Estado de produção
 
-Em `2026-08-19`, SegurosMais e SimulaçãoCreditoPessoal receberam o código phpList `3.6.17` e o respetivo plugin exclusivo `0.3.0`. SimulaçãoCreditoPessoal tem também a BD atualizada para `3.6.17`. No SegurosMais, o admin ainda deve executar `Upgrade` para passar a marca da BD de `3.6.16` para `3.6.17`; o código público, o plugin e o `VERSION` já estão em `3.6.17`.
+Em `2026-08-21`, Saldo e SegurosMais ficaram compostos e validados localmente contra phpList 3.7.0, sem qualquer acesso a produção. SimulaçãoCreditoPessoal não recebeu novo deploy. A publicação de Saldo depende primeiro de confirmar PHP 8.2 ou superior no alojamento e de seguir `docs/DEPLOY-PHPLIST-3.7.0.md`.
 
-Em `2026-08-20`, foi criado o overlay local independente `saldo`, inicialmente igual ao de SimulaçãoCreditoPessoal. A instalação `simulacoes.saldo.pt` ainda precisa do seu `deploy/saldo/lists/config/config.php` próprio; esse ficheiro não é inventado nem reutilizado de outro site.
-
-Como a tag `3.6.17` não tem um pacote completo de produção, o núcleo atual parte da distribuição oficial SourceForge `3.6.16`, checksum SHA-256 `12c43ef7e1e785b9875e086172cbd15b26cd09d0b1ceb1755abb9ee05c57346c`, e recebe por cima o código `3.6.17` e os hooks comuns NFS. Assim, `deploy/common/` inclui também `base/vendor`, a interface administrativa e as dependências comuns necessárias. Os plugins de produção são completados pelo overlay escolhido.
+O núcleo usa o package oficial SourceForge `phplist-3.7.0.tgz`, SHA-256 `614475133e5c0983f0021b95386a5f03ffe44f4640dd1079a1b083b7def57437`. A distribuição oficial 3.6.17 também foi obtida e validada para a comparação, SHA-256 `bcc790fd451862f03f2a0476d8ce9e8a794211d946613e0f7415dd4cde08e3d8`.

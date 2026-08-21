@@ -4,11 +4,11 @@
 
 Este repositório mantém um núcleo comum do phpList e um overlay independente para cada instalação. O núcleo é atualizado quando surge uma nova versão do phpList; os overlays preservam tudo o que é particular de cada site.
 
-Instalações atuais:
+Instalações:
 
 - `segurosmais`: `escolhas.segurosmais.pt`;
-- `simulacaocreditopessoal`: `escolhas.simulacaocreditopessoal.com`;
-- `saldo`: `simulacoes.saldo.pt`.
+- `saldo`: `simulacoes.saldo.pt` — primeiro alvo da 3.7.0;
+- `simulacaocreditopessoal`: instalação legada a descontinuar, sem novo artefacto operacional.
 
 ## Estrutura
 
@@ -19,7 +19,8 @@ NFSlist/
 ├── deploy/
 │   ├── common/                        # núcleo gerado, pronto para FTP
 │   │   ├── VERSION
-│   │   └── lists/
+│   │   └── root/
+│   │       └── lists/
 │   ├── segurosmais/
 │   │   └── lists/
 │   │       ├── config/config.php
@@ -37,7 +38,9 @@ NFSlist/
 └── docs/                              # documentação NFS
 ```
 
-`public_html/lists/` continua a ser a fonte canónica porque conserva a estrutura oficial do projeto phpList e permite integrar versões futuras com menos conflitos. Como os arquivos de código do GitHub não incluem todas as dependências de produção, o gerador começa numa distribuição oficial completa guardada em `upstream-packages/` e aplica por cima a fonte canónica atualizada. `deploy/common/` é o resultado pronto para FTP e não deve ser editado manualmente.
+`public_html/lists/` continua a ser a fonte canónica porque conserva a estrutura oficial do projeto phpList e permite integrar versões futuras com menos conflitos. O gerador começa na distribuição oficial completa guardada em `upstream-packages/` e aplica apenas os ficheiros auditados que diferem do package. `deploy/common/` é o resultado pronto para FTP e não deve ser editado manualmente.
+
+`deploy/common/root/` representa a raiz web remota. `deploy/common/VERSION` é metadado local do artefacto e não faz parte da raiz a enviar. Na 3.7.0, `lists/admin/init.php` e `lists/admin/structure.php` vêm já gerados no package de produção; nunca devem ser substituídos pelas variantes da árvore de desenvolvimento.
 
 ## Núcleo comum
 
@@ -45,7 +48,9 @@ O núcleo contém:
 
 - todos os ficheiros oficiais da versão phpList em uso;
 - dependências de produção, interface administrativa e idiomas incluídos na distribuição oficial;
-- os hooks e patches NFS que são necessários em todas as instalações;
+- os cinco patches NFS que são necessários em todas as instalações;
+- os dois fixes upstream de CSRF posteriores ao package 3.7.0;
+- a correção de compatibilidade PHP 8.2 para CSV com line endings `CR`;
 - bibliotecas, assets e restantes ficheiros iguais nos três sites.
 
 O núcleo não contém:
@@ -68,7 +73,7 @@ Regras:
 3. Cada overlay contém o conjunto completo de plugins de produção compatível com essa instalação.
 4. Uma alteração específica nunca é feita no núcleo comum.
 5. Um ficheiro só passa para o núcleo quando for comprovadamente igual e necessário nas três instalações.
-6. O conjunto de plugins de `saldo` começa igual ao de `simulacaocreditopessoal`, mas pode evoluir separadamente.
+6. `simulacaocreditopessoal` permanece apenas como referência legada; não entra no build nem nos testes operacionais 3.7.0.
 
 Os `config.php` reais ficam no workspace para poderem ser revistos e enviados por FTP, mas são ignorados pelo Git porque contêm passwords. Para documentar a estrutura sem expor segredos, cada instalação pode ter um `config.php.example` versionado.
 
@@ -76,7 +81,7 @@ Os `config.php` reais ficam no workspace para poderem ser revistos e enviados po
 
 Para qualquer instalação:
 
-1. Copiar todo o conteúdo de `deploy/common/` para a raiz web da instalação.
+1. Copiar todo o conteúdo de `deploy/common/root/` para a raiz web da instalação.
 2. Copiar todo o conteúdo de `deploy/<instalação>/` para a mesma raiz, aceitando a substituição de ficheiros.
 3. Confirmar que o `config.php` e o plugin presentes no servidor pertencem à instalação correta.
 4. Abrir o admin do phpList e executar `Upgrade` quando a versão da base de dados estiver atrasada.
@@ -85,7 +90,7 @@ Para qualquer instalação:
 Exemplo para `simulacoes.saldo.pt`:
 
 ```text
-deploy/common/  -> raiz FTP de simulacoes.saldo.pt
+deploy/common/root/  -> raiz FTP de simulacoes.saldo.pt
 deploy/saldo/   -> mesma raiz FTP, por cima do núcleo
 ```
 
@@ -95,9 +100,9 @@ deploy/saldo/   -> mesma raiz FTP, por cima do núcleo
 2. Guardar em `upstream-packages/` a distribuição completa de produção e o respetivo checksum oficial.
 3. Integrar a fonte da nova versão em `public_html/lists/`.
 4. Reaplicar e testar apenas os hooks NFS comuns.
-5. Não alterar automaticamente os overlays das instalações.
+5. Não alterar automaticamente configurações ou plugins privados dos overlays.
 6. Gerar novamente `deploy/common/` e os manifestos de verificação.
-7. Testar o núcleo com cada um dos três overlays.
+7. Testar o núcleo com os overlays Saldo e SegurosMais; manter SimulaçãoCreditoPessoal como legado.
 8. Fazer backup de ficheiros e base de dados antes do deploy.
 9. Publicar primeiro o núcleo e depois o overlay correto.
 
@@ -124,3 +129,7 @@ Permanecem no workspace:
 - `_workbench/`, como documentação privada permanente do utilizador, sempre ignorada pelo Git.
 
 Nunca executar `git clean` de forma genérica neste repositório: os `config.php` reais e outros ficheiros privados são deliberadamente ignorados pelo Git.
+
+## Estado da versão 3.7.0
+
+O package oficial completo `phplist-3.7.0.tgz` é validado pelo SHA-256 oficial antes de cada build. O `composer.json` declara PHP `^8.1`, mas as dependências efetivamente incluídas exigem PHP 8.2 ou superior; o deploy usa este requisito mais restritivo. O resultado local fica em `deploy/common/root/lists/`; a receita específica de atualização e rollback está em `docs/DEPLOY-PHPLIST-3.7.0.md`.

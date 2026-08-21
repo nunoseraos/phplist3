@@ -81,6 +81,13 @@ compose_and_check \
 
 official_old="$(mktemp)"
 official_new="$(mktemp)"
+old_archive="$ROOT_DIR/upstream-packages/phplist-3.6.17.tgz"
+old_archive_sha256="bcc790fd451862f03f2a0476d8ce9e8a794211d946613e0f7415dd4cde08e3d8"
+[[ -f "$old_archive" ]] || fail "official 3.6.17 comparison package is missing"
+[[ "$(shasum -a 256 "$old_archive" | awk '{print $1}')" == "$old_archive_sha256" ]] \
+    || fail "official 3.6.17 comparison package has an invalid checksum"
+grep -Fq 'VERSION=3.6.17' "$ROOT_DIR/upstream-packages/phplist-3.6.17/VERSION" \
+    || fail "official comparison package does not identify 3.6.17"
 (cd "$ROOT_DIR/upstream-packages/phplist-3.6.17/public_html/lists" && \
     find . -type f ! -path './admin/plugins/*' ! -path './config/config.php' | LC_ALL=C sort) >"$official_old"
 (cd "$ROOT_DIR/upstream-packages/phplist-3.7.0/public_html/lists" && \
