@@ -3,13 +3,22 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION_NUMBER="$(sed -n 's/^VERSION=//p' "$ROOT_DIR/VERSION")"
-UPSTREAM_PACKAGE_VERSION="3.6.16"
+UPSTREAM_PACKAGE_VERSION="3.7.0"
+UPSTREAM_PACKAGE_SHA256="614475133e5c0983f0021b95386a5f03ffe44f4640dd1079a1b083b7def57437"
+UPSTREAM_ARCHIVE="$ROOT_DIR/upstream-packages/phplist-${UPSTREAM_PACKAGE_VERSION}.tgz"
 UPSTREAM_LISTS="$ROOT_DIR/upstream-packages/phplist-${UPSTREAM_PACKAGE_VERSION}/public_html/lists"
 COMMON_ROOT="$ROOT_DIR/deploy/common"
+COMMON_LISTS="$COMMON_ROOT/root/lists"
 MANIFEST="$ROOT_DIR/deploy/common.sha256"
 
-if [[ "$VERSION_NUMBER" != "3.6.17" ]]; then
+if [[ "$VERSION_NUMBER" != "$UPSTREAM_PACKAGE_VERSION" ]]; then
     echo "Refusing to build unexpected phpList version: $VERSION_NUMBER" >&2
+    exit 1
+fi
+
+actual_package_sha256="$(shasum -a 256 "$UPSTREAM_ARCHIVE" | awk '{print $1}')"
+if [[ "$actual_package_sha256" != "$UPSTREAM_PACKAGE_SHA256" ]]; then
+    echo "Invalid checksum for official phpList $UPSTREAM_PACKAGE_VERSION package." >&2
     exit 1
 fi
 
@@ -19,33 +28,42 @@ if [[ ! -f "$UPSTREAM_LISTS/base/vendor/autoload.php" ]]; then
     exit 1
 fi
 
-mkdir -p "$COMMON_ROOT/lists"
+mkdir -p "$COMMON_LISTS"
 
 rsync -a --delete --delete-excluded \
     --exclude '.DS_Store' \
     --exclude 'Thumbs.db' \
     --exclude 'config/config.php' \
     --exclude 'admin/plugins/' \
-    "$UPSTREAM_LISTS/" "$COMMON_ROOT/lists/"
+    "$UPSTREAM_LISTS/" "$COMMON_LISTS/"
 
-# Overlay the 3.6.17 source and all common NFS hooks on the last complete
-# production distribution. phpList published 3.6.17 as a source-only tag.
-rsync -a \
-    --exclude '.DS_Store' \
-    --exclude 'Thumbs.db' \
-    --exclude 'config/config.php' \
-    --exclude 'admin/plugins/' \
-    "$ROOT_DIR/public_html/lists/" "$COMMON_ROOT/lists/"
+# The production package contains generated release files (notably init.php and
+# structure.php) that must not be replaced by their development-tree variants.
+# Overlay only the two post-package upstream security fixes and the five common
+# NFS customizations audited for 3.7.0.
+source_overlays=(
+    "admin/bouncerules.php"
+    "admin/massremove.php"
+    "admin/connect.php"
+    "admin/lib.php"
+    "admin/pluginlib.php"
+    "admin/spageedit.php"
+    "index.php"
+)
 
-cp "$ROOT_DIR/VERSION" "$COMMON_ROOT/VERSION"
+for relative_path in "${source_overlays[@]}"; do
+    mkdir -p "$(dirname "$COMMON_LISTS/$relative_path")"
+    rsync -a "$ROOT_DIR/public_html/lists/$relative_path" "$COMMON_LISTS/$relative_path"
+done
+
+rsync -a "$ROOT_DIR/VERSION" "$COMMON_ROOT/VERSION"
 
 (
     cd "$COMMON_ROOT"
     find . -type f -print0 | xargs -0 shasum -a 256 | LC_ALL=C sort
 ) >"$MANIFEST"
 
-printf 'Built %s from production %s + source %s (%s files)\n' \
+printf 'Built %s from verified production %s + audited NFS/security overlays (%s files)\n' \
     "$COMMON_ROOT" \
     "$UPSTREAM_PACKAGE_VERSION" \
-    "$VERSION_NUMBER" \
     "$(wc -l <"$MANIFEST" | tr -d ' ')"
