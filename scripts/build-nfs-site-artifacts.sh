@@ -39,11 +39,12 @@ rsync -a --delete --delete-excluded \
 
 # The production package contains generated release files (notably init.php and
 # structure.php) that must not be replaced by their development-tree variants.
-# Overlay only the two post-package upstream security fixes and the five common
-# NFS customizations audited for 3.7.0.
+# Overlay only the two post-package upstream security fixes, the PHP 8.2 CSV
+# compatibility fix and the five common NFS customizations audited for 3.7.0.
 source_overlays=(
     "admin/bouncerules.php"
     "admin/massremove.php"
+    "admin/CsvReader.php"
     "admin/connect.php"
     "admin/lib.php"
     "admin/pluginlib.php"
@@ -63,7 +64,7 @@ rsync -a "$ROOT_DIR/VERSION" "$COMMON_ROOT/VERSION"
     find . -type f -print0 | xargs -0 shasum -a 256 | LC_ALL=C sort
 ) >"$MANIFEST"
 
-printf 'Built %s from verified production %s + audited NFS/security overlays (%s files)\n' \
+printf 'Built %s from verified production %s + audited source overlays (%s files)\n' \
     "$COMMON_ROOT" \
     "$UPSTREAM_PACKAGE_VERSION" \
     "$(wc -l <"$MANIFEST" | tr -d ' ')"

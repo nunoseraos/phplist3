@@ -21,7 +21,8 @@ assert_contains() {
 
 assert_contains "VERSION" "VERSION=3.7.0" "deployment version is 3.7.0"
 assert_contains "upstream-packages/phplist-3.7.0/VERSION" "VERSION=3.7.0" "official production package is 3.7.0"
-assert_contains "upstream-packages/phplist-3.7.0/public_html/lists/base/composer.json" '"php": "^8.1"' "production package requires PHP 8.1 or newer"
+assert_contains "upstream-packages/phplist-3.7.0/public_html/lists/base/composer.json" '"php": "^8.1"' "root package declares PHP 8.1 or newer"
+assert_contains "upstream-packages/phplist-3.7.0/public_html/lists/base/vendor/composer/platform_check.php" 'PHP_VERSION_ID >= 80200' "bundled dependencies effectively require PHP 8.2 or newer"
 assert_contains "public_html/lists/admin/admins.php" "verifyCsrfGetToken()" "admin deletion verifies its CSRF token"
 assert_contains "public_html/lists/admin/bouncerules.php" "verifyToken()" "bounce-rule POST actions verify their token"
 assert_contains "public_html/lists/admin/bouncerules.php" "verifyCsrfGetToken()" "bounce-rule deletion verifies its CSRF token"

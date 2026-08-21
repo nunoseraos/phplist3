@@ -3,7 +3,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-php_image="php:8.1-cli"
+php_image="php:8.2-cli"
 
 run_variant() {
     local plugin_path="$1"
