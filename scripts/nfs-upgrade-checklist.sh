@@ -32,8 +32,6 @@ target_files=(
 plugin_files=(
   "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php"
   "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php"
-  "deploy/simulacaocreditopessoal/lists/admin/plugins/NFSCustomizationsPlugin.php"
-  "deploy/simulacaocreditopessoal/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php"
   "deploy/saldo/lists/admin/plugins/NFSCustomizationsPlugin.php"
   "deploy/saldo/lists/admin/plugins/NFSCustomizationsPlugin/nfs_shortcuts.php"
 )
@@ -57,7 +55,6 @@ hook_checks=(
   "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php|NFS_SUPPRESS_POST_CONFIRMATION_EMAIL"
   "public_html/lists/index.php|confirmationRedirectUrl"
   "deploy/segurosmais/lists/admin/plugins/NFSCustomizationsPlugin.php|https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/"
-  "deploy/simulacaocreditopessoal/lists/admin/plugins/NFSCustomizationsPlugin.php|https://saldo.pt/simuladores/obrigado-confirmacao"
   "deploy/saldo/lists/admin/plugins/NFSCustomizationsPlugin.php|https://saldo.pt/simuladores/obrigado-confirmacao"
 )
 
@@ -124,7 +121,7 @@ cat <<'EOF'
 1. Sync upstream on main and update custom branch.
 2. Run this checklist script.
 3. Run tests/run-nfs-site-overlays-test.sh.
-4. Generate deploy/common and apply exactly one of the three site overlays.
+4. Generate deploy/common and apply exactly one of the Saldo or SegurosMais overlays.
 5. Ensure the site-specific "NFS Customizations" plugin is enabled in phpList admin.
 6. Execute end-to-end tests:
    - subscribe + ajax subscribe

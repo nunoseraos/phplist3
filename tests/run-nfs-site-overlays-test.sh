@@ -3,7 +3,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-php_image="php:7.2-cli"
+php_image="php:8.1-cli"
 
 run_variant() {
     local plugin_path="$1"
@@ -30,13 +30,6 @@ run_variant \
     5 \
     https://segurosmais.pt/resultado/automovel/ \
     14
-
-run_variant \
-    deploy/simulacaocreditopessoal/lists/admin/plugins/NFSCustomizationsPlugin.php \
-    https://saldo.pt/simuladores/obrigado-confirmacao \
-    14 \
-    https://creditosim.pt/resultado/credito-pessoal/ \
-    5
 
 run_variant \
     deploy/saldo/lists/admin/plugins/NFSCustomizationsPlugin.php \
