@@ -11,6 +11,7 @@ run_variant() {
     local thankyou_page="$3"
     local thankyou_url="$4"
     local foreign_page="$5"
+    local suppression_page="$6"
 
     docker run --rm \
         --volume "${repo_root}:/app:ro" \
@@ -21,7 +22,8 @@ run_variant() {
         "$confirmation_url" \
         "$thankyou_page" \
         "$thankyou_url" \
-        "$foreign_page"
+        "$foreign_page" \
+        "$suppression_page"
 }
 
 run_variant \
@@ -29,11 +31,13 @@ run_variant \
     https://segurosmais.pt/pagina-subscricao-newsletter-simulacoes/ \
     5 \
     https://segurosmais.pt/resultado/automovel/ \
-    14
+    14 \
+    5
 
 run_variant \
     deploy/saldo/lists/admin/plugins/NFSCustomizationsPlugin.php \
     https://saldo.pt/simuladores/obrigado-confirmacao \
     14 \
     https://creditosim.pt/resultado/credito-pessoal/ \
-    5
+    5 \
+    65

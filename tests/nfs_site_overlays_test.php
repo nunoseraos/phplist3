@@ -1,7 +1,7 @@
 <?php
 
-if ($argc !== 6) {
-    fwrite(STDERR, "Usage: php nfs_site_overlays_test.php <plugin> <confirmation-url> <thankyou-page> <thankyou-url> <foreign-page>\n");
+if ($argc !== 7) {
+    fwrite(STDERR, "Usage: php nfs_site_overlays_test.php <plugin> <confirmation-url> <thankyou-page> <thankyou-url> <foreign-page> <suppression-page>\n");
     exit(2);
 }
 
@@ -19,6 +19,7 @@ $expectedConfirmationUrl = $argv[2];
 $thankyouPage = (int) $argv[3];
 $expectedThankyouUrl = $argv[4];
 $foreignPage = (int) $argv[5];
+$suppressionPage = (int) $argv[6];
 
 require $pluginFile;
 
@@ -49,6 +50,11 @@ if (strpos($thankyouMarkup, $expectedThankyouUrl) === false) {
 $foreignMarkup = $plugin->parseThankyou($foreignPage, 0, 'unchanged');
 if ($foreignMarkup !== 'unchanged') {
     fwrite(STDERR, sprintf("Foreign page %d unexpectedly has a redirect\n", $foreignPage));
+    exit(1);
+}
+
+if (!$plugin->hidePostConfirmationMessageFields($suppressionPage)) {
+    fwrite(STDERR, sprintf("Post-confirmation email is not suppressed for page %d\n", $suppressionPage));
     exit(1);
 }
 

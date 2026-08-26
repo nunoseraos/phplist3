@@ -1,10 +1,10 @@
 # NFSCustomizationsPlugin
 
-Documento canónico das customizações NFS ao phpList e das diferenças entre os overlays. A integração atual usa phpList `3.7.0` e `NFSCustomizationsPlugin` `0.3.0`.
+Documento canónico das customizações NFS ao phpList e das diferenças entre os overlays. A integração atual usa phpList `3.7.0`; o overlay Saldo está em `NFSCustomizationsPlugin` `0.3.1` e os restantes mantêm `0.3.0`.
 
 ## Variantes
 
-Existem três plugins independentes, todos na versão `0.3.0`. Saldo e SegurosMais são os overlays operacionais da 3.7.0; SimulaçãoCreditoPessoal fica preservado como referência legada:
+Existem três plugins independentes. Saldo divergiu para `0.3.1` ao adoptar as subscribe pages 65–68; SegurosMais e SimulaçãoCreditoPessoal permanecem em `0.3.0`. Saldo e SegurosMais são os overlays operacionais da 3.7.0; SimulaçãoCreditoPessoal fica preservado como referência legada:
 
 ```text
 deploy/segurosmais/lists/admin/plugins/
@@ -66,7 +66,8 @@ O plugin impede o email genérico `confirmationsubject:*`/`confirmationmessage:*
 
 - SegurosMais: pages `1`, `5` a `13` e `18`;
 - SimulaçãoCreditoPessoal: pages `14`, `18`, `999` e `1000`.
-- Saldo: começa com as pages `14`, `18`, `999` e `1000`, numa cópia independente.
+- Saldo: pages activas `65` (S00), `66` (S01), `67` (S02) e `68` (teste
+  isolado); `14`, `18`, `999` e `1000` ficam apenas para confirmações legadas.
 
 ## Todas as customizações do plugin
 
@@ -85,6 +86,23 @@ Valida `attribute9` quando preenchido e submetido. O formato obrigatório é `NN
 ### Confirmação double opt-in
 
 `subscriberConfirmation()` marca a confirmação na sessão para suprimir o email adicional nas pages configuradas. `hidePostConfirmationMessageFields()` esconde os campos dessa mensagem. `confirmationRedirectUrl()` devolve sempre o destino fixo da variante.
+
+O plugin **não compõe nem guarda o primeiro email DOI**. Esse email vem dos
+campos `subscribesubject:<pageid>` e `subscribemessage:<pageid>` da subscribe
+page. No Saldo, o admin do site sincroniza esses dois campos através da API v4
+quando se grava `Confirmação Double opt-in`; a cópia em
+`simulator_email_templates` nunca pode ser tratada como fonte remota por si só.
+
+Contrato obrigatório para novos simuladores Saldo:
+
+1. criar uma subscribe page isolada e adicioná-la a
+   `PHPLIST_SUBSCRIBE_PAGE_MAP` pelo nome exacto da lista;
+2. gravar assunto e HTML com `[CONFIRMATIONURL]` na secção **Transaction
+   messages**;
+3. incluir o novo page ID em `defaultSuppressPostConfirmMailPages` (ou na
+   constante privada equivalente) antes do deploy do overlay;
+4. reler a page e provar que assunto/corpo correspondem à cópia do Saldo;
+5. testar DOI, redirect e ausência do email genérico pós-confirmação.
 
 ### Remoção da assinatura phpList
 

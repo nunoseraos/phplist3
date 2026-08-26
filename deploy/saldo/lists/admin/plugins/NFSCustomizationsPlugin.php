@@ -6,10 +6,10 @@ if (!defined('PHPLISTINIT')) {
 
 class NFSCustomizationsPlugin extends phplistPlugin
 {
-    public $name = 'NFS Customizations - SimulacaoCreditoPessoal';
-    public $version = '0.3.0';
+    public $name = 'NFS Customizations - Saldo';
+    public $version = '0.3.1';
     public $authors = 'NFS';
-    public $description = 'Customizations exclusive to SimulacaoCreditoPessoal.';
+    public $description = 'Customizations exclusive to Saldo.pt.';
     public $coderoot = 'plugins/NFSCustomizationsPlugin/';
     public $topMenuLinks = array(
         'nfs_shortcuts' => array('category' => 'subscribers'),
@@ -29,10 +29,11 @@ class NFSCustomizationsPlugin extends phplistPlugin
     // suprimido. Depois do duplo opt-in o subscritor já é reencaminhado para a
     // página de agradecimento do site e recebe, minutos depois, o email de
     // resposta do simulador; o aviso do phpList é um terceiro email, sem marca.
-    // As páginas do Saldo (999, 1000) faltavam aqui: eram as únicas de
-    // toda a instalação a enviá-lo.
+    // 65–68 são as subscribe pages da instância saldo-2026: S00, S01, S02
+    // e o teste isolado. Os IDs antigos ficam preservados apenas para os
+    // fluxos legados que ainda possam confirmar links emitidos no passado.
     private $defaultSuppressPostConfirmMailPages = array(
-        14, 18, 999, 1000,
+        14, 18, 65, 66, 67, 68, 999, 1000,
     );
 
     public function activate()
