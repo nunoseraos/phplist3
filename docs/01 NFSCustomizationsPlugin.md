@@ -89,9 +89,12 @@ Valida `attribute9` quando preenchido e submetido. O formato obrigatório é `NN
 
 O plugin **não compõe nem guarda o primeiro email DOI**. Esse email vem dos
 campos `subscribesubject:<pageid>` e `subscribemessage:<pageid>` da subscribe
-page. No Saldo, o admin do site sincroniza esses dois campos através da API v4
-quando se grava `Confirmação Double opt-in`; a cópia em
-`simulator_email_templates` nunca pode ser tratada como fonte remota por si só.
+page. No Saldo, o admin do site sincroniza esses dois campos através do
+formulário nativo `spageedit` quando se grava `Confirmação Double opt-in`; a
+cópia em `simulator_email_templates` nunca pode ser tratada como fonte remota
+por si só. O endpoint REST v4 de subscribe pages não é fonte de verdade para
+estas chaves: pode aceitar/reler dados sem alterar a mensagem efetivamente
+enviada pelo core.
 
 Contrato obrigatório para novos simuladores Saldo:
 
@@ -101,8 +104,13 @@ Contrato obrigatório para novos simuladores Saldo:
    messages**;
 3. incluir o novo page ID em `defaultSuppressPostConfirmMailPages` (ou na
    constante privada equivalente) antes do deploy do overlay;
-4. reler a page e provar que assunto/corpo correspondem à cópia do Saldo;
+4. reler a page pela própria interface nativa, em **Transaction messages**, e
+   provar que assunto/corpo correspondem à cópia do Saldo; a API v4 isolada não
+   constitui prova;
 5. testar DOI, redirect e ausência do email genérico pós-confirmação.
+
+Os plugins `restapi` e `restapi_test` são legados e não participam nesta
+sincronização; não os ativar para tentar corrigir mensagens DOI.
 
 ### Remoção da assinatura phpList
 
