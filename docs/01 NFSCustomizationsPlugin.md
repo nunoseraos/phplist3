@@ -102,12 +102,17 @@ Contrato obrigatório para novos simuladores Saldo:
    `PHPLIST_SUBSCRIBE_PAGE_MAP` pelo nome exacto da lista;
 2. gravar assunto e HTML com `[CONFIRMATIONURL]` na secção **Transaction
    messages**;
-3. incluir o novo page ID em `defaultSuppressPostConfirmMailPages` (ou na
+3. definir no título nativo um nome que identifique inequivocamente o
+   simulador; nunca deixar `Subscribe to our newsletter`;
+4. incluir o novo page ID em `defaultSuppressPostConfirmMailPages` (ou na
    constante privada equivalente) antes do deploy do overlay;
-4. reler a page pela própria interface nativa, em **Transaction messages**, e
+5. reler a page pela própria interface nativa, em **Transaction messages**, e
    provar que assunto/corpo correspondem à cópia do Saldo; a API v4 isolada não
    constitui prova;
-5. testar DOI, redirect e ausência do email genérico pós-confirmação.
+6. quando `emaildoubleentry` estiver ativo, enviar no POST público `email` e
+   `emailconfirm` com o mesmo endereço; sem o segundo campo o phpList devolve
+   erro de validação e não tenta SMTP;
+7. testar DOI, redirect e ausência do email genérico pós-confirmação.
 
 Os plugins `restapi` e `restapi_test` são legados e não participam nesta
 sincronização; não os ativar para tentar corrigir mensagens DOI.
