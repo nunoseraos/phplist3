@@ -133,6 +133,21 @@ Deteta autoresponders suspensos e campanhas presas em `inprocess`, envia alerta 
 
 Valores por omissão: campanha presa após `6` horas e cooldown de `360` minutos.
 
+### Assuntos e ciclo de vida dos autoresponders
+
+Os marcadores de atributos usados no assunto devem respeitar exatamente o nome
+do atributo. No Saldo, o nome próprio é **`[FirstName]`**; não usar
+`[FIRSTNAME]` no assunto, porque pode ser entregue literalmente apesar de essa
+variante ser tolerada no corpo da mensagem.
+
+O overlay NFS não altera o ciclo de vida do `AutoresponderPlugin`: quando há
+destinatários elegíveis, o plugin submete a própria campanha e o core termina o
+lote com a campanha em `sent`. Esse estado entre lotes é normal. A regra
+continua ativa e volta a submeter a campanha a partir de `sent` ou `draft`
+quando surgem novos destinatários; `usermessage` mantém o histórico que impede
+reenvios ao mesmo subscritor. Guardar a campanha manualmente volta a colocá-la
+em `draft`, mas o envio seguinte colocá-la-á novamente em `sent`.
+
 ## Constantes suportadas no config.php
 
 | Constante | Função | Omissão |
