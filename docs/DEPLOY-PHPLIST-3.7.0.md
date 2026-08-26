@@ -149,7 +149,7 @@ Se a base de dados é local e não exige TLS, não adicionar os dois novos parâ
 
 | Plugin | Saldo | SegurosMais | Compatibilidade 3.7.0 / ação |
 |---|---:|---:|---|
-| `NFSCustomizationsPlugin` | 0.3.0 | 0.3.0 | testes comportamentais e lint OK; manter |
+| `NFSCustomizationsPlugin` | 0.3.1 | 0.3.1 | no Saldo, suprime também as subscribe pages 65–68; testes comportamentais e lint OK; manter |
 | `Autoresponder` | 3.2.0 | 3.6.4 | sintaxe OK; testar cron/autoresponders |
 | `BounceStatisticsPlugin` | 2.1.3 | 2.3.0 | sintaxe OK; testar leitura de bounces |
 | `CKEditorPlugin` | 2.7.1 | 2.6.9 | sintaxe OK; package traz 2.8.2; manter por agora e testar edição/envio antes de atualizar |
